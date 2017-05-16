@@ -1,0 +1,16 @@
+The function "cal_plan" (see the R directory) will randomly sample the specified number of performances
+from each of the raters in your dataset. Then it will redistribute those performance to other raters for the purpose of calibration sessions and Rasch analysis in Facets. It outputs eight files automatically.
+
+1. A visual of the unlinked data
+2. A table of how the data was originally collected
+3. An unlinked dataset to test for subset connection in Facets
+4. An index table for diagnostic checking. To be used if you believe
+the reassignment did not work correctly
+5. A calibration plan table. This table will show which examiners
+get which performance. The first column will indicate the orginal
+plan and the next k columns will indicate the assignments for each
+calibration session.
+6. A linked dataset with random scores to verify the subset connection
+in Facets.
+7. A visual table of the linking plan.
+8. A second visual table of the linking plan
