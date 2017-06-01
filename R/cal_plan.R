@@ -3,7 +3,8 @@ library(here)
 library(tidyverse)
 
 data <- here('data', 'test_data.csv') %>%
-    read_csv()
+    read_csv(., col_types = 'dcd') %>%
+    mutate(., ExaminerID = as.factor(ExaminerID))
 
 ############ Cal.Plan ###################
 
@@ -43,6 +44,11 @@ cal_plan <- function(d, k, r, c){
   #     Written by Geoffrey T. LaFlair (2013)
   #
   ###########################################
+
+  d <- data
+  k <- 1
+  r <- length(unique(d$ExaminerID))
+  c <- 2
 
   require(sampling)
   temp <- strata(d, stratanames = "ExaminerID",
