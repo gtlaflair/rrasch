@@ -3,6 +3,9 @@ library(magrittr)
 
 rate_plan <- function(responses, raters){
 
+    responses <- 1998
+    raters <- 65
+
     ratings <- 2
 
     num_resp <- 1:responses
@@ -35,7 +38,7 @@ rate_plan <- function(responses, raters){
 
     rate_table$c_0 <- num_resp
 
-    j <- rep(r, length(num_raters))
+    j <- rep(raters, length(num_raters))
     s <- rep(k, length(num_raters))
 
     h <- 0:(ratings-1)
@@ -65,7 +68,7 @@ rate_plan <- function(responses, raters){
         rate_tabs <- data.frame("raters" = e, rate_tabs)
     }
 
-    m <- data.frame(rate_tabs[-c(2:(c+1))])
+    m <- data.frame(rate_tabs[-c(2:(ratings+1))])
     m <- m[-4]
     mcol <- ncol(m)
     link_test <- reshape(m, direction = "long", ids = row.names(m),
@@ -74,6 +77,10 @@ rate_plan <- function(responses, raters){
     link_test <- link_test %>%
         mutate(rand_score = sample(0:9, n(), replace = TRUE)) %>%
         select(., 3, 1, 5)
+
+    rater_view <- link_test %>%
+        group_by(num_raters) %>%
+        summarise(Counts = n())
 
 
     write.csv(link_test, "link_test.csv", row.names = FALSE)
