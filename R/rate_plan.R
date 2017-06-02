@@ -1,12 +1,51 @@
 library(tidyverse)
 library(magrittr)
+library(here)
 
-rate_plan <- function(responses, raters){
+ess <- here('data', 'essays_raters.csv') %>%
+    read_csv(.)
+
+rate_plan <- function(responses, raters, data = NULL){
 
     # responses <- 1998
     # raters <- 65
 
+    # responses = 'examinee_id'
+    # raters = 'rater_id'
+    # d <- ess
+
     ratings <- 2
+
+
+    if(!is.null(data)){
+
+        d <- data
+
+        num_responses <- length(unique(d[[responses]]))
+        num_rate <- length(unique(d[[raters]]))
+
+        resp_attrs <- as.character(d[[responses]])
+
+        rate_attrs <- d %>%
+            .[[raters]] %>%
+            na.omit(.)
+
+        num_resp <- 1:num_responses %>%
+            setattr(., responses, resp_attrs)
+
+        num_raters <- 1:num_rate %>%
+            setattr(., raters, rate_attrs) %>%
+            rep(., num_responses/num_rate)
+
+        dif <- num_responses - length(num_raters)
+
+        num_raters <- num_raters %>%
+            c(., .[0:dif])
+
+    }
+
+
+    if(is.null(data)){
 
     num_resp <- 1:responses
 
@@ -21,24 +60,26 @@ rate_plan <- function(responses, raters){
     num_raters <- num_raters %>%
         c(., .[0:dif])
 
+    }
+
     rate_table <- data.frame(num_resp, num_raters)
 
     k <- 1
 
-    n_raters <- rep(raters, length(num_raters))
+    n_raters <- rep(num_rate, length(num_raters))
     k_constant <- rep(k, length(num_raters))
 
     rate_table <- rate_table %>%
         mutate(km = rep(0:(k-1), length(num_raters)/k))
 
-    jn <- sort(rep(0:(raters-1), raters)) %>%
+    jn <- sort(rep(0:(num_rate-1), num_rate)) %>%
         .[1:length(num_raters)]
 
     rate_table$jn <- jn
 
     rate_table$c_0 <- num_resp
 
-    j <- rep(raters, length(num_raters))
+    j <- rep(num_rate, length(num_raters))
     s <- rep(k, length(num_raters))
 
     h <- 0:(ratings-1)
@@ -80,12 +121,14 @@ rate_plan <- function(responses, raters){
 
     rater_view <- link_test %>%
         group_by(num_raters) %>%
-        mutate(Tasks = map_int(., str_int))
+        # mutate(Tasks = map_int(., str_int))
         summarise(Counts = n())
 
 
     write.csv(link_test, "link_test.csv", row.names = FALSE)
 
-    return(link_test)
+    tables <- list(link_test, rater_view)
+
+    return(tables)
 
 }
