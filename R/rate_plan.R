@@ -3,8 +3,8 @@ library(magrittr)
 
 rate_plan <- function(responses, raters){
 
-    responses <- 1998
-    raters <- 65
+    # responses <- 1998
+    # raters <- 65
 
     ratings <- 2
 
@@ -80,6 +80,7 @@ rate_plan <- function(responses, raters){
 
     rater_view <- link_test %>%
         group_by(num_raters) %>%
+        mutate(Tasks = map_int(., str_int))
         summarise(Counts = n())
 
 
