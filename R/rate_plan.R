@@ -1,6 +1,8 @@
 library(tidyverse)
 library(magrittr)
 library(here)
+library(sticky)
+library(data.table)
 
 ess <- here('data', 'essays_raters.csv') %>%
     read_csv(.)
@@ -31,10 +33,17 @@ rate_plan <- function(responses, raters, data = NULL){
             na.omit(.)
 
         num_resp <- 1:num_responses %>%
-            setattr(., responses, resp_attrs)
+            setattr(., responses, resp_attrs) %>%
+            sticky(.)
 
         num_raters <- 1:num_rate %>%
-            setattr(., raters, rate_attrs) %>%
+            sticky(.)
+
+        attr(num_raters, 'responses') <- resp_attrs
+
+        # loss of attributes starts here
+
+        num_raters <- num_raters %>%
             rep(., num_responses/num_rate)
 
         dif <- num_responses - length(num_raters)
