@@ -1,94 +1,156 @@
 library(tidyverse)
 library(magrittr)
 library(here)
-library(sticky)
-library(data.table)
+library(openxlsx)
+
 
 ess <- here('data', 'essays_raters.csv') %>%
     read_csv(.)
 
-rate_plan <- function(responses, raters, data = NULL){
+responses <- ess$examinee_id
+raters <- ess$rater_id %>% na.omit(.)
+tasks <- ess$task_id
+benchmarks <- responses[6:10]
 
-    # responses <- 1998
-    # raters <- 65
+responses <- 1563
+raters <- 19
+tasks <- 3
 
-    # responses = 'examinee_id'
-    # raters = 'rater_id'
-    # d <- ess
+t <- sample(1:10000, 5069, replace = FALSE) %>%
+    data.frame(.)
+
+write_csv(t, 't.csv')
+
+rate_plan <- function(responses, tasks, raters, benchmarks = NULL){
 
     ratings <- 2
 
+    if(length(responses) == 1 & length(raters) == 1 & length(unique(tasks)) == 1){
 
-    if(!is.null(data)){
+        num_resp <- 1:responses
 
-        d <- data
+        num_tasks <- 1:tasks %>%
+            rep(., responses / tasks)
 
-        num_responses <- length(unique(d[[responses]]))
-        num_rate <- length(unique(d[[raters]]))
+        dif_tasks <- responses - length(num_tasks)
 
-        resp_attrs <- as.character(d[[responses]])
+        num_tasks <- num_tasks %>%
+            c(., .[0:dif_tasks])
 
-        rate_attrs <- d %>%
-            .[[raters]] %>%
-            na.omit(.)
+        # n_rater_reps <- responses / raters
 
-        num_resp <- 1:num_responses %>%
-            setattr(., responses, resp_attrs) %>%
-            sticky(.)
+        # num_raters <- n_rater_reps %>%
+            # rerun(sample(raters)) %>%
+            # unlist(.)
 
-        num_raters <- 1:num_rate %>%
-            sticky(.)
+        num_raters <- 1:raters %>%
+            sample(.) %>%
+            rep(., responses / raters)
 
-        attr(num_raters, 'responses') <- resp_attrs
-
-        # loss of attributes starts here
-
-        num_raters <- num_raters %>%
-            rep(., num_responses/num_rate)
-
-        dif <- num_responses - length(num_raters)
+        dif_raters <- responses - length(num_raters)
 
         num_raters <- num_raters %>%
-            c(., .[0:dif])
+            c(., .[0:dif_raters])
+
+        rate_table <- data.frame(num_resp, num_tasks, num_raters)
+
+        raters_n <- raters
 
     }
 
+    if(length(responses) > 1 & length(responses) > 1 & length(unique(tasks)) > 1){
 
-    if(is.null(data)){
+        if(is.null(benchmarks)){
 
-    num_resp <- 1:responses
+            rate_table <- data.frame(num_resp = responses, num_tasks = tasks)
 
-    # num_ratings <- 1:ratings %>%
-        # rep(., ceiling(responses/ratings))
+            # responses <- responses
 
-    num_raters <- 1:raters %>%
-        rep(., responses/raters)
+            num_resp <- rate_table$num_resp
 
-    dif <- responses - length(num_raters)
+            # num_tasks <- tasks
 
-    num_raters <- num_raters %>%
-        c(., .[0:dif])
+            # num_tasks <- tasks %>%
+            #     rep(., length(responses) / length(tasks))
+            #
+            # dif_tasks <- length(responses) - length(num_tasks)
+            #
+            # num_tasks <- num_tasks %>%
+            #     c(., .[0:dif_tasks])
 
-    }
+            # n_rater_reps <- length(responses) / length(raters)
 
-    rate_table <- data.frame(num_resp, num_raters)
+            # num_raters <- n_rater_reps %>%
+            # rerun(sample(raters)) %>%
+            # unlist()
+
+            num_raters <- raters %>%
+                sample(.) %>%
+                rep(., length(responses) / length(raters))
+
+            dif_raters <- length(responses) - length(num_raters)
+
+            num_raters <- num_raters %>%
+                c(., .[0:dif_raters])
+
+            rate_table <- data.frame(rate_table, num_raters)
+
+            raters_n <- length(unique(num_raters))
+
+        }
+
+
+        if(!is.null(benchmarks)) {
+
+            rate_table <- data.frame(num_resp = responses, num_tasks = tasks)
+
+            bench <- rate_table[which(rate_table$num_resp %in% benchmarks),]
+
+            rate_table <- rate_table[which(!rate_table$num_resp %in% benchmarks),]
+
+            responses <- responses[which(!responses %in% benchmarks)]
+
+            num_resp <- rate_table$num_resp
+
+            num_raters <- raters %>%
+                sample(.) %>%
+                rep(., length(responses) / length(raters))
+
+            dif_raters <- length(responses) - length(num_raters)
+
+            num_raters <- num_raters %>%
+                c(., .[0:dif_raters])
+
+            rate_table <- data.frame(rate_table, num_raters)
+
+            raters_n <- length(unique(num_raters))
+
+            bens <- data.frame(num_resp = rep(bench$num_resp, length(raters)), num_task = rep(bench$num_task, length(raters)))
+
+            bens <- arrange(bens, num_resp) %>%
+                cbind(., raters) %>%
+                rename(., response_ids = num_resp, task_ids = num_task, rater_ids = raters) %>%
+                mutate(rand_score = sample(0:9, n(), replace = TRUE))
+
+    }}
+
 
     k <- 1
 
-    n_raters <- rep(num_rate, length(num_raters))
+    n_raters <- rep(raters_n, length(num_raters))
     k_constant <- rep(k, length(num_raters))
 
     rate_table <- rate_table %>%
         mutate(km = rep(0:(k-1), length(num_raters)/k))
 
-    jn <- sort(rep(0:(num_rate-1), num_rate)) %>%
+    jn <- sort(rep(0:(raters_n-1), raters_n)) %>%
         .[1:length(num_raters)]
 
     rate_table$jn <- jn
 
     rate_table$c_0 <- num_resp
 
-    j <- rep(num_rate, length(num_raters))
+    j <- rep(raters_n, length(num_raters))
     s <- rep(k, length(num_raters))
 
     h <- 0:(ratings-1)
@@ -98,45 +160,57 @@ rate_plan <- function(responses, raters, data = NULL){
 
     rate_names <- NULL
     for (i in 1:length(h)) {
-        rate_names[[paste("c",i,sep="_")]] <- ((rate_table[,h[1]+5])+(s*q)+((s*2)*h[i]))%%(s*j)
+        rate_names[[paste("c",i,sep="_")]] <- ((rate_table[,h[1]+6])+(s*q)+((s*2)*h[i]))%%(s*j)
         rate_names[i]
         rate_table[l_col+i] <- rate_names[i]
     }
 
     y <- 0:ratings
     t <- rate_table[1]
-    e <- rate_table[2]
+    z <- rate_table[2]
+    e <- rate_table[3]
 
     rate_rep <- NULL
     rate_tabs <- NULL
     for (i in 1:length(y)){
-        rate_rep[[paste("responses", i-1, sep=".")]] <- rate_table[order(rate_table[,y[i]+5]),c(2:3, i+3)]
+        rate_rep[[paste("response_ids", i-1, sep=".")]] <- rate_table[order(rate_table[,y[i]+6]),c(2:3, i+3)]
         rate_rep[[i]][3] <- t
         rate_rep[[i]] <- rate_rep[[i]][order(rate_rep[[i]][1]),]
-        rate_tabs[paste("responses", i-1, sep = ".")] <- as.data.frame.list(rate_rep[[i]][3])
+        rate_tabs[paste("response_ids", i-1, sep = ".")] <- as.data.frame.list(rate_rep[[i]][3])
         rate_tabs <- as.data.frame(rate_tabs)
-        rate_tabs <- data.frame("raters" = e, rate_tabs)
+        rate_tabs <- data.frame('tasks' = z, "raters" = e, rate_tabs)
     }
 
-    m <- data.frame(rate_tabs[-c(2:(ratings+1))])
-    m <- m[-4]
+    m <- data.frame(rate_tabs[-c(3:(ratings+4))])
+    m <- m[-5]
     mcol <- ncol(m)
     link_test <- reshape(m, direction = "long", ids = row.names(m),
-                        varying = c(2:mcol))
+                         varying = c(3:mcol))
+
+    # lt <- m %>%
+        # gather(., key = id, value, -num_tasks, -num_raters)
 
     link_test <- link_test %>%
         mutate(rand_score = sample(0:9, n(), replace = TRUE)) %>%
-        select(., 3, 1, 5)
+        select(., 4, 1, 2, 6) %>%
+        rename(., rater_ids = num_raters, task_ids = num_tasks)
+
+    if(!is.null(benchmarks)){
+
+        link_test <- bind_rows(link_test, bens)
+    }
 
     rater_view <- link_test %>%
-        group_by(num_raters) %>%
-        # mutate(Tasks = map_int(., str_int))
-        summarise(Counts = n())
+        group_by(rater_ids) %>%
+        summarise(response_ids = list(response_ids),
+                  task_ids = list(task_ids),
+                  rater_counts = n())
 
+    tables <- list(rater_view, link_test)
 
-    write.csv(link_test, "link_test.csv", row.names = FALSE)
-
-    tables <- list(link_test, rater_view)
+    write_csv(link_test, "link_test.csv")
+    write_rds(rater_view, 'rater_view.rds')
+    write.xlsx(link_test, 'facets_data.xlsx', rowNames = FALSE, colNames = FALSE)
 
     return(tables)
 
