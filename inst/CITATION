@@ -1,0 +1,13 @@
+citHeader("To cite the 'rrasch' package in publications, please use:")
+
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("Version", meta$Version)
+
+citEntry(entry="Manual",
+         title = "rrasch: R functions for planning Rasch analysis with Facets",
+         author = personList(as.person("Geoffrey T. LaFlair")),
+         year = year,
+         note = vers,
+         url = "https://github.com/gtlaflair/rrasch",
+         textVersion =
+         paste("LaFlair, G.T. (",year,"). rrasch: R functions for planning Rasch analysis with Facets (",vers,") [Software].", " Available from https://github.com/gtlaflair/rrasch", ".", sep=""))

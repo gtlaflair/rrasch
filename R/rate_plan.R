@@ -1,20 +1,45 @@
-library(tidyverse)
-library(magrittr)
-library(here)
-library(openxlsx)
-
-
-ess <- here('data', 'essays_raters.csv') %>%
-    read_csv(.)
-
-responses <- ess$examinee_id
-raters <- ess$rater_id %>% na.omit(.)
-tasks <- ess$task_id
-benchmarks <- responses[6:10]
-
-responses <- 1563
-raters <- 19
-tasks <- 3
+#' Create a linked data plan for multi-faceted Rasch measurement using Facets.
+#'
+#' @param responses The number of responses that will be scored. This can be a single integer or a vector of response IDs.
+#' @param tasks The number of unique tasks. This can be single integer or a vector of task IDs.
+#' @param raters The number of raters. This can be a single integer or a vector of rater IDs.
+#' @param ratings The number of times each response will be scored. Default is 2. This should be an integer.
+#' @param benchmarks Requires a vector of response IDs. This will use the response IDs to create a common set of linking responses for each rater in addition to the indirect links. If NULL, the link is made only through indirect connections,
+#' @param write_tables TRUE or FALSE. Defaults to FALSE. If TRUE, the function will write three tables to the working directory: rater_view.rds, link_test.csv, and facets_data.xlsx
+#' @return \code{tables} contains two tables.The rater_view table is a dataframe that contains the rater IDs and counts for how many responses the raters will score. In addition, it contains up to two listcolumns: one for the responses that the raters will be scoring and one with the tasks that the raters will be scoring
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %$%
+#' @importFrom dplyr filter
+#' @importFrom dplyr select
+#' @importFrom dplyr contains
+#' @importFrom dplyr arrange
+#' @importFrom dplyr mutate
+#' @importFrom dplyr rename
+#' @importFrom dplyr select
+#' @importFrom dplyr summarise
+#' @importFrom dplyr group_by
+#' @importFrom dplyr bind_rows
+#' @importFrom readr write_csv
+#' @importFrom readr write_rds
+#' @importFrom tidyr gather
+#' @importFrom openxlsx write.xlsx
+#' @importFrom tibble as_tibble
+#'
+#' @examples
+#' Unknown response and task IDs
+#'
+#' ex_1 <- rate_plan(responses = 1000, tasks = 3, raters = 2, ratings = 2)
+#'
+#' Known response and task IDs
+#'
+#' resp_ids <- sample(3000:8000, size = 1500, replace = FALSE)
+#' rate_ids <- c('R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9')
+#' task_ids <- c('T1', 'T2', 'T3', 'T4')
+#' benc_ids <- resp_ids[1:10]
+#'
+#' ex_2 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3)
+#'
+#' ex_3 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3, benchmarks = bench_ids)
 
 rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NULL, write_tables = FALSE){
 

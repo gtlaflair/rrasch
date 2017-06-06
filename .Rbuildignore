@@ -1,2 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^R/cal_plan\.R$
+^R/Linktest\.txt$
+^R/Linktest_custom\.txt$
+^data/essays_raters\.csv$
+^R-dev$

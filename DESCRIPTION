@@ -1,11 +1,22 @@
 Package: rrasch
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Rrasch: R Functions for Planning Rasch Analysis with Facets.
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Geoffrey T. LaFlair
+Maintainer: Geoffrey T. LaFlair <gtlaflair@gmail.com>
+Description: This packagee provides functions for planning a Rasch analysis
+    using Linacre's Facets program.
 Encoding: UTF-8
-LazyData: true
+Depends:
+    R (>= 2.10)
+Date: 2017-6-6
+License: GPL-3
+LazyData: TRUE
+Imports:
+    dplyr,
+    here,
+    magrittr,
+    openxlsx,
+    readr,
+    tibble
+RoxygenNote: 5.0.1
