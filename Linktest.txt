@@ -1,0 +1,20 @@
+Title = Link Test
+Output = linktest.txt
+Facets = 2 ; two facets: judges, examinees
+Non-centered = 1 ; examinees and items are centered on 0, judges are allowed to float
+Positive = 2 ; the examinees have greater creativity with greater score
+Tables = Yes
+Model = ?,?,R ; 
+
+Labels = 
+1, examinees
+1-1563
+*
+2, tasks
+1-3
+*
+
+2, raters
+1-19
+*
+data= facets_data.xlsx

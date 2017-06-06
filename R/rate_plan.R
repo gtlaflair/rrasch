@@ -42,12 +42,6 @@ rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NUL
         num_tasks <- num_tasks %>%
             c(., .[0:dif_tasks])
 
-        # n_rater_reps <- responses / raters
-
-        # num_raters <- n_rater_reps %>%
-            # rerun(sample(raters)) %>%
-            # unlist(.)
-
         num_raters <- 1:raters %>%
             sample(.) %>%
             rep(., responses / raters)
@@ -69,25 +63,7 @@ rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NUL
 
             rate_table <- data.frame(num_resp = responses, num_tasks = tasks)
 
-            # responses <- responses
-
             num_resp <- rate_table$num_resp
-
-            # num_tasks <- tasks
-
-            # num_tasks <- tasks %>%
-            #     rep(., length(responses) / length(tasks))
-            #
-            # dif_tasks <- length(responses) - length(num_tasks)
-            #
-            # num_tasks <- num_tasks %>%
-            #     c(., .[0:dif_tasks])
-
-            # n_rater_reps <- length(responses) / length(raters)
-
-            # num_raters <- n_rater_reps %>%
-            # rerun(sample(raters)) %>%
-            # unlist()
 
             num_raters <- raters %>%
                 sample(.) %>%
