@@ -16,14 +16,19 @@ responses <- 1563
 raters <- 19
 tasks <- 3
 
-t <- sample(1:10000, 5069, replace = FALSE) %>%
-    data.frame(.)
+rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NULL, print_tables = FALSE){
 
-write_csv(t, 't.csv')
 
-rate_plan <- function(responses, tasks, raters, benchmarks = NULL){
+    if(!is.null(ratings)){
 
-    ratings <- 2
+    ratings <- ratings
+
+    }
+
+    if(is.null(ratings)){
+
+        ratings <- 2
+    }
 
     if(length(responses) == 1 & length(raters) == 1 & length(unique(tasks)) == 1){
 
@@ -181,36 +186,51 @@ rate_plan <- function(responses, tasks, raters, benchmarks = NULL){
         rate_tabs <- data.frame('tasks' = z, "raters" = e, rate_tabs)
     }
 
-    m <- data.frame(rate_tabs[-c(3:(ratings+4))])
-    m <- m[-5]
-    mcol <- ncol(m)
-    link_test <- reshape(m, direction = "long", ids = row.names(m),
-                         varying = c(3:mcol))
 
-    # lt <- m %>%
-        # gather(., key = id, value, -num_tasks, -num_raters)
-
-    link_test <- link_test %>%
+    link_test <- rate_tabs %>%
+        select(., -contains('num_tasks.'), -contains('num_raters.'), -contains('response_ids.0')) %>%
+        gather(., key = id, value = response_ids, -num_tasks, -num_raters) %>%
         mutate(rand_score = sample(0:9, n(), replace = TRUE)) %>%
-        select(., 4, 1, 2, 6) %>%
-        rename(., rater_ids = num_raters, task_ids = num_tasks)
+        select(., 4, 1, 2, 5) %>%
+        rename(., rater_ids = num_raters, task_ids = num_tasks) %>%
+        as_tibble(.)
 
     if(!is.null(benchmarks)){
 
         link_test <- bind_rows(link_test, bens)
     }
 
-    rater_view <- link_test %>%
-        group_by(rater_ids) %>%
-        summarise(response_ids = list(response_ids),
-                  task_ids = list(task_ids),
-                  rater_counts = n())
+    if(length(unique(num_tasks)) < 2){
 
-    tables <- list(rater_view, link_test)
+        link_test <- link_test %>%
+            select(., -task_ids)
+
+        rater_view <- link_test %>%
+            group_by(rater_ids) %>%
+            summarise(response_ids = list(response_ids),
+                      rater_counts = n())
+    }
+
+    if(length(unique(num_tasks)) > 2){
+
+        link_test <- link_test
+
+        rater_view <- link_test %>%
+            group_by(rater_ids) %>%
+            summarise(response_ids = list(response_ids),
+                      task_ids = list(task_ids),
+                      rater_counts = n())
+    }
+
+    tables <- list('rater_view' = rater_view, 'link_test' = link_test)
+
+    if(print_tables == TRUE){
 
     write_csv(link_test, "link_test.csv")
     write_rds(rater_view, 'rater_view.rds')
     write.xlsx(link_test, 'facets_data.xlsx', rowNames = FALSE, colNames = FALSE)
+
+    }
 
     return(tables)
 
