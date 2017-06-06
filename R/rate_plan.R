@@ -16,7 +16,7 @@ responses <- 1563
 raters <- 19
 tasks <- 3
 
-rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NULL, print_tables = FALSE){
+rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NULL, write_tables = FALSE){
 
 
     if(!is.null(ratings)){
@@ -200,11 +200,11 @@ rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NUL
 
     tables <- list('rater_view' = rater_view, 'link_test' = link_test)
 
-    if(print_tables == TRUE){
+    if(write_tables == TRUE){
 
-    write_csv(link_test, "link_test.csv")
-    write_rds(rater_view, 'rater_view.rds')
-    write.xlsx(link_test, 'facets_data.xlsx', rowNames = FALSE, colNames = FALSE)
+        write_csv(link_test, "link_test.csv")
+        write_rds(rater_view, 'rater_view.rds')
+        write.xlsx(link_test, 'facets_data.xlsx', rowNames = FALSE, colNames = FALSE)
 
     }
 
