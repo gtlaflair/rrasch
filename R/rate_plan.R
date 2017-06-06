@@ -25,6 +25,8 @@
 #' @importFrom openxlsx write.xlsx
 #' @importFrom tibble as_tibble
 #'
+#' @export rate_plan
+#'
 #' @examples
 #' Unknown response and task IDs
 #'
