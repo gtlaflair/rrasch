@@ -41,7 +41,7 @@
 #'
 #' ex_2 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3)
 #'
-#' ex_3 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3, benchmarks = bench_ids)
+#' ex_3 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3, benchmarks = benc_ids)
 
 rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NULL, write_tables = FALSE){
 
@@ -203,7 +203,7 @@ rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NUL
         link_test <- bind_rows(link_test, bens)
     }
 
-    if(length(unique(num_tasks)) < 2){
+    if(length(unique(rate_table$num_tasks)) < 2){
 
         link_test <- link_test %>%
             select(., -task_ids)
@@ -214,7 +214,7 @@ rate_plan <- function(responses, tasks, raters, ratings = NULL, benchmarks = NUL
                       rater_counts = n())
     }
 
-    if(length(unique(num_tasks)) > 2){
+    if(length(unique(rate_table$num_tasks)) > 2){
 
         link_test <- link_test
 

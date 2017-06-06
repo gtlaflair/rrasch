@@ -40,6 +40,6 @@ benc_ids <- resp_ids[1:10]
 
 ex_2 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3)
 
-ex_3 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3, benchmarks = bench_ids)
+ex_3 <- rate_plan(responses = resp_ids, tasks = task_ids, raters = rate_ids, ratings = 3, benchmarks = benc_ids)
 }
 
